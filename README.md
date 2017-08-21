@@ -1,4 +1,4 @@
-# Weather-App
+# Node.JS Weather App
 Node.JS project to get current weather conditions by zip code or city from command line.
 
 This project makes use of the Weather Underground API. To test this application out for yourself, you will need to create an API key on their site here: https://www.wunderground.com/weather/api/
