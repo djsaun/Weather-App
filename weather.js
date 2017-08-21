@@ -8,6 +8,14 @@ const api_key = require('./api.json');
 function getWeather(query) {
   const weatherRequest = https.get(`https://api.wunderground.com/api/${api_key.key}/conditions/q/${query}.json`, response => {
 
+    const zipCode = /(^\d{5}$)|(^\d{5}-\d{4}$)/;
+    let queryType = "";
+    if (zipCode.test(query)) {
+      queryType = "zip";
+    } else {
+      queryType = "city";
+    }
+
     let body = "";
 
     response.on('data', data => {
@@ -21,9 +29,17 @@ function getWeather(query) {
     response.on('end', () => {
       const bodyContent = body.toString();
       const parsedContent = JSON.parse(bodyContent);
-      console.log(parsedContent['current_observation']);
+      const fullLocation = parsedContent["current_observation"]["display_location"]["full"];
+      const zipLocation = parsedContent["current_observation"]["display_location"]["zip"]
+      let location = "";
 
-      console.log(`The current temperature for ${parsedContent["current_observation"]["display_location"]["full"]} is ${parsedContent["current_observation"]["temp_f"]} degrees Fahrenheit with a heat index of ${parsedContent["current_observation"]["heat_index_f"]} degrees Fahrenheit.`)
+      if (queryType === "zip") {
+        location = zipLocation;
+      } else {
+        location = fullLocation;
+      }
+
+      console.log(`The current temperature for ${location} is ${parsedContent["current_observation"]["temp_f"]} degrees Fahrenheit with a heat index of ${parsedContent["current_observation"]["heat_index_f"]} degrees Fahrenheit.`)
     })
   })
 }
