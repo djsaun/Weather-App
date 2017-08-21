@@ -3,6 +3,30 @@ const api_key = require('./api.json');
 
 // print temp details
 
+function printWeather(queryType, weather) {
+  const fullLocation = weather["current_observation"]["display_location"]["full"];
+  const zipLocation = weather["current_observation"]["display_location"]["zip"];
+  const heatIndex = weather["current_observation"]["heat_index_f"];
+  let location = "";
+
+  if (queryType === "zip") {
+    location = zipLocation;
+  } else {
+    location = fullLocation;
+  }
+
+  let tempResponse = "";
+  tempResponse += `The current temperature for ${location} is ${weather["current_observation"]["temp_f"]} degrees Fahrenheit`;
+
+  if (heatIndex != 'NA') {
+    tempResponse += ` with a heat index of ${heatIndex} degrees Fahrenheit.`;
+  } else {
+    tempResponse += `.`;
+  }
+
+  console.log(tempResponse);
+}
+
 // print error messages
 
 function getWeather(query) {
@@ -29,28 +53,8 @@ function getWeather(query) {
     response.on('end', () => {
       const bodyContent = body.toString();
       const parsedContent = JSON.parse(bodyContent);
-      const fullLocation = parsedContent["current_observation"]["display_location"]["full"];
-      const zipLocation = parsedContent["current_observation"]["display_location"]["zip"];
-      const heatIndex = parsedContent["current_observation"]["heat_index_f"];
-      let location = "";
 
-      if (queryType === "zip") {
-        location = zipLocation;
-      } else {
-        location = fullLocation;
-      }
-
-      let tempResponse = "";
-      tempResponse += `The current temperature for ${location} is ${parsedContent["current_observation"]["temp_f"]} degrees Fahrenheit`;
-
-
-      if (heatIndex != 'NA') {
-        tempResponse += ` with a heat index of ${heatIndex} degrees Fahrenheit.`;
-      } else {
-        tempResponse += `.`;
-      }
-
-      console.log(tempResponse);
+      printWeather(queryType, parsedContent);
     })
   })
 }
