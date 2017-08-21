@@ -30,7 +30,8 @@ function getWeather(query) {
       const bodyContent = body.toString();
       const parsedContent = JSON.parse(bodyContent);
       const fullLocation = parsedContent["current_observation"]["display_location"]["full"];
-      const zipLocation = parsedContent["current_observation"]["display_location"]["zip"]
+      const zipLocation = parsedContent["current_observation"]["display_location"]["zip"];
+      const heatIndex = parsedContent["current_observation"]["heat_index_f"];
       let location = "";
 
       if (queryType === "zip") {
@@ -39,7 +40,17 @@ function getWeather(query) {
         location = fullLocation;
       }
 
-      console.log(`The current temperature for ${location} is ${parsedContent["current_observation"]["temp_f"]} degrees Fahrenheit with a heat index of ${parsedContent["current_observation"]["heat_index_f"]} degrees Fahrenheit.`)
+      let tempResponse = "";
+      tempResponse += `The current temperature for ${location} is ${parsedContent["current_observation"]["temp_f"]} degrees Fahrenheit`;
+
+
+      if (heatIndex != 'NA') {
+        tempResponse += ` with a heat index of ${heatIndex} degrees Fahrenheit.`;
+      } else {
+        tempResponse += `.`;
+      }
+
+      console.log(tempResponse);
     })
   })
 }
