@@ -1,4 +1,5 @@
 const https = require('https');
+const http = require('http');
 const api_key = require('./api.json');
 
 // print temp details
@@ -29,34 +30,58 @@ function printWeather(queryType, weather) {
 
 // print error messages
 
+function printError(error) {
+  console.error(error.message);
+}
+
 function getWeather(query) {
-  const weatherRequest = https.get(`https://api.wunderground.com/api/${api_key.key}/conditions/q/${query}.json`, response => {
+  try {
+    const weatherRequest = https.get(`https://api.wunderground.com/api/${api_key.key}/conditions/q/${query}.json`, response => {
+      if (response.statusCode === 200) {
+        const zipCode = /(^\d{5}$)|(^\d{5}-\d{4}$)/;
+        let queryType = "";
 
-    const zipCode = /(^\d{5}$)|(^\d{5}-\d{4}$)/;
-    let queryType = "";
-    if (zipCode.test(query)) {
-      queryType = "zip";
-    } else {
-      queryType = "city";
-    }
+        if (zipCode.test(query)) {
+          queryType = "zip";
+        } else {
+          queryType = "city";
+        }
 
-    let body = "";
+        let body = "";
 
-    response.on('data', data => {
-      body += data;
+        response.on('data', data => {
+          body += data;
+        });
+
+        response.on('error', error => {
+          printError(error);
+        })
+
+        response.on('end', () => {
+          const queryError = new Error(`The location '${query}' was not found. Please try again.`);
+
+          try {
+            const bodyContent = body.toString();
+            const parsedContent = JSON.parse(bodyContent);
+
+            if (parsedContent['current_observation']['display_location']) {
+              printWeather(queryType, parsedContent);
+            } else {
+              printError(queryError);
+            }
+
+          } catch(error) {
+            printError(queryError);
+          }
+        });
+      } else {
+        const statusCodeError = new Error(`There was an error getting the result for ${query}. (${http.STATUS_CODES[response.statusCode]})`);
+        printError(statusCodeError);
+      }
     });
-
-    response.on('error', error => {
-      console.log(error.message);
-    })
-
-    response.on('end', () => {
-      const bodyContent = body.toString();
-      const parsedContent = JSON.parse(bodyContent);
-
-      printWeather(queryType, parsedContent);
-    })
-  })
+  } catch(error) {
+    printError(error);
+  }
 }
 
 module.exports.getWeather = getWeather;
