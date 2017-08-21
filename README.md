@@ -10,3 +10,7 @@ Once you have an API key, create a file called `json.api` in the root directory.
   "key": "API KEY"
 }
 ```
+
+Run the application in your command line by entering `node app.js [city, state]` or by entering `node app.js [zip]`.
+
+For example, `node app.js Austin, TX` and `node app.js 78704`.
